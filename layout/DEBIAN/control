@@ -1,0 +1,10 @@
+Package: com.simpzan.jetsamctl
+Name: JetsamCTL
+Version: 1.1
+Architecture: iphoneos-arm
+Description: a command line tool and on-demand service to set/get jetsam limit.
+Maintainer: Samuel Zhang - KidsDev91 (Mod)
+Author: Samuel Zhang - KidsDev91 (Mod)
+Section: System
+Tag: role::hacker
+Depends: cm90.crossoveripc

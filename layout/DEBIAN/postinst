@@ -1,0 +1,36 @@
+#!/bin/sh
+set +e
+
+# ========== [1️⃣ Xác định môi trường jailbreak] ==========
+if [ -f "/rootfs/bin/ps" ]; then
+    JB_ROOT=""
+elif [ -f "/var/jb/usr/bin/sh" ]; then
+    JB_ROOT="/var/jb"
+else
+    JB_ROOT=""
+fi
+  
+KIDS_JETSAM_PATH="$JB_ROOT/Library/LaunchDaemons/com.simpzan.jetsamctl.plist"
+if [ -f "$KIDS_JETSAM_PATH" ]; then
+  echo "[JetsamCTL] plist found, setting permissions..."
+  # Ensure correct permissions and ownership for LaunchDaemon plist
+  chmod 644 "$KIDS_JETSAM_PATH"
+  chown root:wheel "$KIDS_JETSAM_PATH"
+  # Load the daemon with bootstrap for root daemons
+  echo "Loading [JetsamCTL] using bootstrap system..."
+  launchctl bootstrap system "$KIDS_JETSAM_PATH" 2>&1
+  BOOTSTRAP_STATUS=$?
+  
+  if [ $BOOTSTRAP_STATUS -eq 0 ]; then
+    echo "✅ [JetsamCTL] bootstrapped successfully!"
+  else
+    echo "⚠️ [JetsamCTL] Bootstrap failed, trying traditional load..."
+    launchctl load -w "$KIDS_JETSAM_PATH" 2>&1
+    LOAD_STATUS=$?
+    echo "[JetsamCTL] Traditional load status: $LOAD_STATUS"
+  fi
+else
+  echo "ERROR: [JetsamCTL] plist not found at ${KIDS_JETSAM_PATH}"
+fi
+
+exit 0

@@ -1,0 +1,24 @@
+#!/bin/sh
+set +e
+
+# ========== [1️⃣ Xác định môi trường jailbreak] ==========
+if [ -f "/rootfs/bin/ps" ]; then
+    JB_ROOT=""
+elif [ -f "/var/jb/usr/bin/sh" ]; then
+    JB_ROOT="/var/jb"
+else
+    JB_ROOT=""
+fi
+
+KIDS_JETSAM_PATH="$JB_ROOT/Library/LaunchDaemons/com.simpzan.jetsamctl.plist"
+if [ -f "$KIDS_JETSAM_PATH" ]; then
+
+  echo "Unloading previous [JetsamCTL] instance if it exists..."
+  
+  launchctl bootout system/JetsamCTL 2>/dev/null || true
+
+  launchctl unload "$KIDS_JETSAM_PATH" 2>/dev/null || true
+
+fi
+
+exit 0
