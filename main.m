@@ -22,7 +22,7 @@ int setHighWaterMark(int pid, int limit) {
     int cmd = MEMORYSTATUS_CMD_SET_JETSAM_HIGH_WATER_MARK;
     int result = memorystatus_control(cmd, pid, limit, 0, 0);
     if (result) {
-        fprintf(stderr, "[Kids] failed to setHighWaterMark of pid %d to %dMB: %d\n", pid, limit, errno);
+        JetLog(@"failed to setHighWaterMark of pid %d to %dMB: %d\n", pid, limit, errno);
     }
     return result;
 }
@@ -30,13 +30,13 @@ int setHighWaterMark(int pid, int limit) {
 int getHightWaterMark(int pid) {
     int size = memorystatus_control(MEMORYSTATUS_CMD_GET_PRIORITY_LIST, 0, 0, NULL, 0);
     if (size < 0) {
-        fprintf(stderr, "[Kids] failed to get priority list size: %d\n", errno);
+        JetLog(@"failed to get priority list size: %d\n", errno);
         return -1;
     }
 
     memorystatus_priority_entry_t *list = (memorystatus_priority_entry_t *)malloc(size);
     if (!list) {
-        fprintf(stderr, "[Kids] failed to allocate memory of size %d: %d\n", size, errno);
+        JetLog(@"failed to allocate memory of size %d: %d\n", size, errno);
         return -1;
     }
 
@@ -90,7 +90,7 @@ NS_ASSUME_NONNULL_END
         // centerNamed:type: giả sử trả về singleton center
         _cross = [objc_getClass("CrossOverIPC") centerNamed:@"com.kids.jetsamlisten" type:SERVICE_TYPE_LISTENER];
         if (!_cross) {
-            JetLog(@"<Jetsam> Failed obtain CrossOverIPC center: com.kids.jetsamlisten");
+            JetLog(@"Failed obtain CrossOverIPC center: com.kids.jetsamlisten");
             return;
         }
 
@@ -98,7 +98,7 @@ NS_ASSUME_NONNULL_END
         [_cross registerForMessageName:@"setupHighWaterMark" target:self selector:@selector(handleSetupHighWaterMark:withUserInfo:)];
         [_cross registerForMessageName:@"setupPriority" target:self selector:@selector(handleSetupPriority:withUserInfo:)];
 
-        JetLog(@"<Jetsam> Listening on com.kids.jetsamlisten");
+        JetLog(@"Listening on com.kids.jetsamlisten");
     });
 }
 
@@ -107,7 +107,7 @@ NS_ASSUME_NONNULL_END
     // Nếu CrossOverIPC có method để unregister, gọi ở đây.
     // [_cross unregisterForMessageName:...];
     _cross = nil;
-    JetLog(@"<Jetsam> Stopped listening");
+    JetLog(@"Stopped listening");
 }
 
 #pragma mark - Helpers for memorystatus
@@ -116,17 +116,17 @@ NS_ASSUME_NONNULL_END
     // Lấy danh sách priority (size đầu tiên)
     int size = memorystatus_control(MEMORYSTATUS_CMD_GET_PRIORITY_LIST, 0, 0, NULL, 0);
     if (size < 0) {
-        JetLog(@"<Jetsam> memorystatus_control size failed: %d (errno=%d)", size, errno);
+        JetLog(@"memorystatus_control size failed: %d (errno=%d)", size, errno);
         return -1;
     }
     memorystatus_priority_entry_t *list = (memorystatus_priority_entry_t *)malloc(size);
     if (!list) {
-        JetLog(@"<Jetsam> malloc failed for size %d", size);
+        JetLog(@"malloc failed for size %d", size);
         return -1;
     }
     int ret = memorystatus_control(MEMORYSTATUS_CMD_GET_PRIORITY_LIST, 0, 0, list, size);
     if (ret < 0) {
-        JetLog(@"<Jetsam> memorystatus_control list fetch failed: %d errno=%d", ret, errno);
+        JetLog(@"memorystatus_control list fetch failed: %d errno=%d", ret, errno);
         free(list);
         return -1;
     }
@@ -148,7 +148,7 @@ NS_ASSUME_NONNULL_END
     int result = memorystatus_control(cmd, pid, limit, 0, 0);
     if (result != 0) {
         // memorystatus_control returns 0 on success, -1 on failure with errno set
-        JetLog(@"<Jetsam> memorystatus_control set failed for pid %d limit %d errno=%d", pid, limit, errno);
+        JetLog(@"memorystatus_control set failed for pid %d limit %d errno=%d", pid, limit, errno);
     }
     return result;
 }
@@ -161,11 +161,11 @@ NS_ASSUME_NONNULL_END
     int result = memorystatus_control(MEMORYSTATUS_CMD_SET_PRIORITY_PROPERTIES,
                                       pid, 0, &props, sizeof(props));
     if (result != 0) {
-        JetLog(@"<Jetsam> Failed to set priority for pid %d: errno=%d", pid, errno);
+        JetLog(@"Failed to set priority for pid %d: errno=%d", pid, errno);
         return NO;
     }
 
-    NSLog(@"<Jetsam> Set priority=%d for pid=%d success", priority, pid);
+    JetLog(@"Set priority=%d for pid=%d success", priority, pid);
     return YES;
 }
 
@@ -176,7 +176,7 @@ NS_ASSUME_NONNULL_END
 // Nếu API khác, hãy chỉnh lại theo project bạn.
 - (void)replyWithName:(NSString *)name toSender:(id)sender userInfo:(NSDictionary *)info {
     if (!_cross) {
-        JetLog(@"<Jetsam> no cross center to reply");
+        JetLog(@"no cross center to reply");
         return;
     }
     // Một số CrossOverIPC có method sendMessage:withUserInfo: hoặc postMessage:...
@@ -197,7 +197,7 @@ NS_ASSUME_NONNULL_END
     }
 
     // Nếu không có API rõ ràng, log ra — bạn cần chỉnh theo CrossOverIPC thực tế.
-    JetLog(@"<Jetsam> cannot reply: no send/post method on CrossOverIPC; name=%@", name);
+    JetLog(@"cannot reply: no send/post method on CrossOverIPC; name=%@", name);
 }
 
 #pragma mark - Message handlers
@@ -213,7 +213,7 @@ NS_ASSUME_NONNULL_END
         }
     }
     if (pid <= 0) {
-        JetLog(@"<Jetsam> handleGettingHighWaterMark invalid pid: %@ (info=%@)", info[@"pid"], info);
+        JetLog(@"handleGettingHighWaterMark invalid pid: %@ (info=%@)", info[@"pid"], info);
         NSDictionary *resp = @{ @"ok": @NO, @"error": @"invalid pid" };
         [self replyWithName:@"gettingHighWaterMarkReply" toSender:sender userInfo:resp];
         return;
@@ -234,7 +234,7 @@ NS_ASSUME_NONNULL_END
         if ([l respondsToSelector:@selector(intValue)]) limit = [l intValue];
     }
     if (pid <= 0 || limit <= 0) {
-        JetLog(@"<Jetsam> handleSetupHighWaterMark invalid args pid=%d limit=%d info=%@", pid, limit, info);
+        JetLog(@"handleSetupHighWaterMark invalid args pid=%d limit=%d info=%@", pid, limit, info);
         NSDictionary *resp = @{ @"ok": @NO, @"error": @"invalid args" };
         [self replyWithName:@"setupHighWaterMarkReply" toSender:sender userInfo:resp];
         return;
@@ -263,7 +263,7 @@ int main(int argc, char **argv, char **envp) {
 	setuid(0);
 	setgid(0);
 
-    JetLog(@"[JetsamMain] Started. Runloop begin.");
+    JetLog(@"Started. Runloop begin.");
     [[JetsamManager sharedManager] startListening];
 
 	CFRunLoopRun();

@@ -4,24 +4,18 @@
 <dict>
     <key>Label</key>
     <string>com.simpzan.jetsamctl</string>
-    <key>Program</key>
-    <string>/var/jb/usr/bin/JetsamCTL</string>
-    <key>Sockets</key>
-    <dict>
-        <key>Listeners</key>
-        <dict>
-            <key>SockNodeName</key>
-            <string>localhost</string>
-            <key>SockServiceName</key>
-            <string>8888</string>
-            <key>SockPassive</key>
-            <true/>
-        </dict>
-    </dict>
-    <key>inetdCompatibility</key>
-    <dict>
-        <key>Wait</key>
-        <false/>
-    </dict>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/var/jb/usr/bin/JetsamCTL</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>NSRunningFromLaunchd</key>
+	    <string>1</string>
+	</dict>
+	<key>RunAtLoad</key>
+	    <true/>
+	<key>StandardErrorPath</key>
+	    <string>/dev/null</string>
 </dict>
 </plist>
