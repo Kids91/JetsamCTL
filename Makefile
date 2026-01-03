@@ -1,4 +1,4 @@
-THEOS_DEVICE_IP		= 192.168.1.50
+THEOS_DEVICE_IP		= 192.168.1.19
 THEOS_DEVICE_PORT	= 22
 # export THEOS_PACKAGE_SCHEME=rootless
 # export THEOS_PACKAGE_SCHEME=roothide
@@ -30,7 +30,7 @@ $(TOOL_NAME)_INSTALL_PATH 	= /usr/bin
 
 ifeq ($(THEOS_PACKAGE_SCHEME), roothide)
 	$(TOOL_NAME)_CFLAGS		+= -DIS_ROOTHIDE
-	LAUNCH_DAEMON_FILE 		= LaunchDaemons/com.simpzan.jetsamct-hide.plist
+	LAUNCH_DAEMON_FILE 		= LaunchDaemons/com.simpzan.jetsamctl-hide.plist
 	PACKAGE_BUILDNAME		:= roothide
 else ifeq ($(THEOS_PACKAGE_SCHEME), rootless)
 	$(TOOL_NAME)_CFLAGS		+= -DIS_ROOTLESS
@@ -63,3 +63,4 @@ endif
 internal-stage::
 	@mkdir -p "$(THEOS_STAGING_DIR)/Library/LaunchDaemons"
 	@cp "$(LAUNCH_DAEMON_FILE)" "$(THEOS_STAGING_DIR)/Library/LaunchDaemons/com.simpzan.jetsamctl.plist"
+	@ldid -Sent.plist $(THEOS_STAGING_DIR)/usr/bin/$(TOOL_NAME)

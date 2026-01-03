@@ -17,7 +17,7 @@ if [ -f "$KIDS_JETSAM_PATH" ]; then
   
   launchctl bootout system/JetsamCTL 2>/dev/null || true
 
-  launchctl unload "$KIDS_JETSAM_PATH" 2>/dev/null || true
+  launchctl unload -w "$KIDS_JETSAM_PATH" 2>/dev/null || true
 
 fi
 
